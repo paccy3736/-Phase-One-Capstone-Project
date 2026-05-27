@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Explorer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: '#1a1f2e',
+            'navy-light': '#232a3b',
+            gold: '#06b6d4',
+            'gold-hover': '#0891b2',
+          },
+          fontFamily: {
+            serif: ['Georgia', 'Cambria', 'Times New Roman', 'serif'],
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    .book-card:hover .book-overlay { opacity: 1; }
+    .accent-text   { color: #06b6d4 !important; }
+    .accent-bg     { background-color: #06b6d4 !important; }
+    .accent-bg:hover { background-color: #0891b2 !important; }
+    .accent-border { border-color: #06b6d4 !important; }
+    .accent-ring   { --tw-ring-color: #06b6d4 !important; }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <!-- NAVBAR -->
+  <nav class="bg-navy px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-lg">
+    <a href="index.html" class="accent-text font-serif text-2xl font-bold tracking-wide">
+      Book Explorer
+    </a>
+    <ul class="hidden md:flex items-center gap-8 text-white text-sm font-medium">
+      <li>
+        <a href="index.html" class="pb-1 border-b-2 border-white hover:accent-text accent-border transition-colors duration-200">
+          Home
+        </a>
+      </li>
+      <li>
+        <a href="favorites.html" class="pb-1 border-b-2 border-transparent hover:text-gold hover:border-gold transition-colors duration-200">
+          Favorites
+        </a>
+      </li>
+      <li>
+        <a href="about.html" class="pb-1 border-b-2 border-transparent hover:text-gold hover:border-gold transition-colors duration-200">
+          About
+        </a>
+      </li>
+    </ul>
+    <button id="menu-btn" class="md:hidden text-white focus:outline-none" aria-label="Toggle menu">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </nav>
+
+  <div id="mobile-menu" class="hidden bg-navy-light md:hidden px-6 py-4 flex flex-col gap-4">
+    <a href="index.html" class="text-white hover:accent-text transition-colors">Home</a>
+    <a href="favorites.html" class="text-white hover:accent-text transition-colors">Favorites</a>
+    <a href="about.html" class="text-white hover:accent-text transition-colors">About</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="text-white py-24 px-6 text-center" style="background: linear-gradient(135deg, #1e1245 0%, #2d1b69 40%, #4a2080 70%, #1a1f2e 100%);">
+    <h1 class="font-serif text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4">
+      Your Next Great Read <span class="accent-text">Awaits You</span>
+    </h1>
+    <p class="text-purple-200 text-base md:text-lg max-w-lg mx-auto mb-10">
+      Explore thousands of books, save your favourites, and let every page take you somewhere new.
+    </p>
+    <form id="search-form" class="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-xl mx-auto">
+      <input
+        id="search-input"
+        type="text"
+        placeholder="Type a book title..."
+        class="w-full sm:flex-1 px-5 py-3 rounded-md text-gray-800 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 accent-ring text-sm"
+        aria-label="Search for a book"
+      />
+      <button type="submit" class="accent-bg text-white font-semibold px-7 py-3 rounded-md transition-colors duration-200 text-sm whitespace-nowrap">
+        Search
+      </button>
+    </form>
+  </section>
+
+  <!-- BOOKS GRID -->
+  <main class="max-w-7xl mx-auto px-6 py-12">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-bold text-gray-800" id="section-title">Featured Books</h2>
+      <span id="result-count" class="text-sm text-gray-500 hidden"></span>
+    </div>
+
+    <div id="loading" class="flex flex-col items-center justify-center py-20 hidden">
+      <div class="w-12 h-12 border-4 accent-border border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p class="text-gray-500 text-sm">Loading books...</p>
+    </div>
+
+    <div id="no-results" class="hidden text-center py-20">
+      <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <p class="text-gray-500 text-lg font-medium">No results found</p>
+      <p class="text-gray-400 text-sm mt-1">Try searching for a different title.</p>
+    </div>
+
+    <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+
+      <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+        <div class="relative overflow-hidden bg-gray-200 h-64">
+          <img src="images/book1.jpg" alt="Book 1" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">Book Title One</h3>
+          <p class="text-gray-500 text-xs mb-3">Author Name</p>
+          <button class="mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200">♡ Add to Favorites</button>
+        </div>
+      </div>
+
+      <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+        <div class="relative overflow-hidden bg-gray-200 h-64">
+          <img src="images/book2.jpg" alt="Book 2" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">Book Title Two</h3>
+          <p class="text-gray-500 text-xs mb-3">Author Name</p>
+          <button class="mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200">♡ Add to Favorites</button>
+        </div>
+      </div>
+
+      <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+        <div class="relative overflow-hidden bg-gray-200 h-64">
+          <img src="images/book3.jpg" alt="Book 3" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">Book Title Three</h3>
+          <p class="text-gray-500 text-xs mb-3">Author Name</p>
+          <button class="mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200">♡ Add to Favorites</button>
+        </div>
+      </div>
+
+      <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+        <div class="relative overflow-hidden bg-gray-200 h-64">
+          <img src="images/book4.jpg" alt="Book 4" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">Book Title Four</h3>
+          <p class="text-gray-500 text-xs mb-3">Author Name</p>
+          <button class="mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200">♡ Add to Favorites</button>
+        </div>
+      </div>
+
+      <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+        <div class="relative overflow-hidden bg-gray-200 h-64">
+          <img src="images/book5.jpg" alt="Book 5" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">Book Title Five</h3>
+          <p class="text-gray-500 text-xs mb-3">Author Name</p>
+          <button class="mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200">♡ Add to Favorites</button>
+        </div>
+      </div>
+
+      <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+        <div class="relative overflow-hidden bg-gray-200 h-64">
+          <img src="images/book6.jpg" alt="Book 6" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">Book Title Six</h3>
+          <p class="text-gray-500 text-xs mb-3">Author Name</p>
+          <button class="mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200">♡ Add to Favorites</button>
+        </div>
+      </div>
+
+      <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+        <div class="relative overflow-hidden bg-gray-200 h-64">
+          <img src="images/book7.jpg" alt="Book 7" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">Book Title Seven</h3>
+          <p class="text-gray-500 text-xs mb-3">Author Name</p>
+          <button class="mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200">♡ Add to Favorites</button>
+        </div>
+      </div>
+
+      <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+        <div class="relative overflow-hidden bg-gray-200 h-64">
+          <img src="images/book8.jpg" alt="Book 8" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">Book Title Eight</h3>
+          <p class="text-gray-500 text-xs mb-3">Author Name</p>
+          <button class="mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200">♡ Add to Favorites</button>
+        </div>
+      </div>
+
+      <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+        <div class="relative overflow-hidden bg-gray-200 h-64">
+          <img src="images/book9.jpg" alt="Book 9" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">Book Title Nine</h3>
+          <p class="text-gray-500 text-xs mb-3">Author Name</p>
+          <button class="mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200">♡ Add to Favorites</button>
+        </div>
+      </div>
+
+      <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+        <div class="relative overflow-hidden bg-gray-200 h-64">
+          <img src="images/book10.jpg" alt="Book 10" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">Book Title Ten</h3>
+          <p class="text-gray-500 text-xs mb-3">Author Name</p>
+          <button class="mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200">♡ Add to Favorites</button>
+        </div>
+      </div>
+
+      <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+        <div class="relative overflow-hidden bg-gray-200 h-64">
+          <img src="images/book11.jpg" alt="Book 11" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">Book Title Eleven</h3>
+          <p class="text-gray-500 text-xs mb-3">Author Name</p>
+          <button class="mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200">♡ Add to Favorites</button>
+        </div>
+      </div>
+
+      <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+        <div class="relative overflow-hidden bg-gray-200 h-64">
+          <img src="images/book12.jpg" alt="Book 12" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">Book Title Twelve</h3>
+          <p class="text-gray-500 text-xs mb-3">Author Name</p>
+          <button class="mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200">♡ Add to Favorites</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="bg-navy text-gray-400 text-center py-6 mt-8">
+    <p class="text-sm">
+      &copy; 2025 <span class="accent-text font-medium">Book Explorer</span>. Built with
+      <span class="text-red-400">&#9829;</span> using Tailwind CSS &amp; Open Library API.
+    </p>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+
+</body>
+</html>
