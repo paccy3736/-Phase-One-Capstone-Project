@@ -1,25 +1,49 @@
-// app.js — Exercise 2.3
-// Wires DOM events on the homepage for favorites
+// app.js — Lab 3 (Exercises 3.2, 3.3, 3.4)
+// Populates homepage from Open Library API with search + loading states
 
 import { addFavorite, removeFavorite, isFavorite } from './favorites.js';
+import { fetchFeaturedBooks, searchBooks } from './fetchBooks.js';
 
-// Hardcoded book data (Lab 2 — will be replaced by API in Lab 3)
-const books = [
-  { id: '1',  title: 'Book Title One',    author: 'Author Name', cover: 'images/book1.jpg'  },
-  { id: '2',  title: 'Book Title Two',    author: 'Author Name', cover: 'images/book2.jpg'  },
-  { id: '3',  title: 'Book Title Three',  author: 'Author Name', cover: 'images/book3.jpg'  },
-  { id: '4',  title: 'Book Title Four',   author: 'Author Name', cover: 'images/book4.jpg'  },
-  { id: '5',  title: 'Book Title Five',   author: 'Author Name', cover: 'images/book5.jpg'  },
-  { id: '6',  title: 'Book Title Six',    author: 'Author Name', cover: 'images/book6.jpg'  },
-  { id: '7',  title: 'Book Title Seven',  author: 'Author Name', cover: 'images/book7.jpg'  },
-  { id: '8',  title: 'Book Title Eight',  author: 'Author Name', cover: 'images/book8.jpg'  },
-  { id: '9',  title: 'Book Title Nine',   author: 'Author Name', cover: 'images/book9.jpg'  },
-  { id: '10', title: 'Book Title Ten',    author: 'Author Name', cover: 'images/book10.jpg' },
-  { id: '11', title: 'Book Title Eleven', author: 'Author Name', cover: 'images/book11.jpg' },
-  { id: '12', title: 'Book Title Twelve', author: 'Author Name', cover: 'images/book12.jpg' },
-];
+// DOM refs
+const grid        = document.getElementById('books-grid');
+const loading     = document.getElementById('loading');
+const noResults   = document.getElementById('no-results');
+const sectionTitle = document.getElementById('section-title');
+const resultCount  = document.getElementById('result-count');
+const searchForm  = document.getElementById('search-form');
+const searchInput = document.getElementById('search-input');
 
-/** Build a single book card element */
+// --- UI helpers ---
+
+function showLoading() {
+  loading.classList.remove('hidden');
+  grid.classList.add('hidden');
+  noResults.classList.add('hidden');
+}
+
+function hideLoading() {
+  loading.classList.add('hidden');
+  grid.classList.remove('hidden');
+}
+
+function showNoResults() {
+  noResults.classList.remove('hidden');
+  grid.classList.add('hidden');
+}
+
+function updateCount(count, query = '') {
+  if (query) {
+    sectionTitle.textContent = `Results for "${query}"`;
+    resultCount.textContent = `${count} book${count !== 1 ? 's' : ''} found`;
+    resultCount.classList.remove('hidden');
+  } else {
+    sectionTitle.textContent = 'Featured Books';
+    resultCount.classList.add('hidden');
+  }
+}
+
+// --- Card builder ---
+
 function createBookCard(book) {
   const card = document.createElement('div');
   card.className = 'book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col';
@@ -38,7 +62,10 @@ function createBookCard(book) {
       <p class="text-gray-500 text-xs mb-3">${book.author}</p>
       <button
         class="fav-btn mt-auto w-full text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200 ${favorited ? 'bg-red-500 hover:bg-red-600' : 'bg-navy hover:bg-gold'}"
-        data-id="${book.id}">
+        data-id="${book.id}"
+        data-title="${book.title}"
+        data-author="${book.author}"
+        data-cover="${book.cover}">
         ${favorited ? '♥ Remove Favorite' : '♡ Add to Favorites'}
       </button>
     </div>
@@ -47,25 +74,69 @@ function createBookCard(book) {
   return card;
 }
 
-/** Render all book cards into the grid */
-function renderBooks() {
-  const grid = document.getElementById('books-grid');
-  if (!grid) return;
+function renderBooks(books) {
   grid.innerHTML = '';
   books.forEach(book => grid.appendChild(createBookCard(book)));
 }
 
-/** Handle favorite button clicks via event delegation */
+// --- API calls ---
+
+async function loadFeatured() {
+  showLoading();
+  try {
+    const books = await fetchFeaturedBooks(12);
+    hideLoading();
+    if (books.length === 0) {
+      showNoResults();
+    } else {
+      renderBooks(books);
+      updateCount(books.length);
+    }
+  } catch (err) {
+    hideLoading();
+    showNoResults();
+    console.error('Failed to load featured books:', err);
+  }
+}
+
+async function handleSearch(e) {
+  e.preventDefault();
+  const query = searchInput.value.trim();
+  if (!query) return;
+
+  showLoading();
+  try {
+    const books = await searchBooks(query, 12);
+    hideLoading();
+    if (books.length === 0) {
+      showNoResults();
+      updateCount(0, query);
+    } else {
+      renderBooks(books);
+      updateCount(books.length, query);
+    }
+  } catch (err) {
+    hideLoading();
+    showNoResults();
+    console.error('Search failed:', err);
+  }
+}
+
+// --- Favorites toggle ---
+
 function handleFavClick(e) {
   const btn = e.target.closest('.fav-btn');
   if (!btn) return;
 
-  const bookId = btn.dataset.id;
-  const book = books.find(b => b.id === bookId);
-  if (!book) return;
+  const book = {
+    id:     btn.dataset.id,
+    title:  btn.dataset.title,
+    author: btn.dataset.author,
+    cover:  btn.dataset.cover,
+  };
 
-  if (isFavorite(bookId)) {
-    removeFavorite(bookId);
+  if (isFavorite(book.id)) {
+    removeFavorite(book.id);
     btn.textContent = '♡ Add to Favorites';
     btn.className = 'fav-btn mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200';
   } else {
@@ -75,18 +146,19 @@ function handleFavClick(e) {
   }
 }
 
-/** Mobile menu toggle */
+// --- Mobile menu ---
+
 function initMobileMenu() {
-  const btn = document.getElementById('menu-btn');
+  const btn  = document.getElementById('menu-btn');
   const menu = document.getElementById('mobile-menu');
-  if (btn && menu) {
-    btn.addEventListener('click', () => menu.classList.toggle('hidden'));
-  }
+  if (btn && menu) btn.addEventListener('click', () => menu.classList.toggle('hidden'));
 }
 
-// Init
+// --- Init ---
+
 document.addEventListener('DOMContentLoaded', () => {
-  renderBooks();
-  document.getElementById('books-grid')?.addEventListener('click', handleFavClick);
+  loadFeatured();
+  grid?.addEventListener('click', handleFavClick);
+  searchForm?.addEventListener('submit', handleSearch);
   initMobileMenu();
 });
