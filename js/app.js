@@ -46,19 +46,19 @@ function updateCount(count, query = '') {
 
 function createBookCard(book) {
   const card = document.createElement('div');
-  card.className = 'book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col';
+  card.className = 'book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col w-full';
   card.dataset.id = book.id;
 
   const favorited = isFavorite(book.id);
 
   card.innerHTML = `
-    <div class="relative overflow-hidden bg-gray-200 h-64">
+    <div class="relative overflow-hidden bg-gray-200 h-48 sm:h-64">
       <img src="${book.cover}" alt="${book.title}"
            class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
            onerror="this.src='https://via.placeholder.com/300x400?text=No+Cover'" />
     </div>
-    <div class="p-4 flex flex-col flex-1">
-      <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">${book.title}</h3>
+    <div class="p-3 sm:p-4 flex flex-col flex-1">
+      <h3 class="font-bold text-gray-800 text-xs sm:text-sm mb-1 line-clamp-2">${book.title}</h3>
       <p class="text-gray-500 text-xs mb-3">${book.author}</p>
       <button
         class="fav-btn mt-auto w-full text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200 ${favorited ? 'bg-green-500 cursor-default' : 'bg-navy hover:bg-gold'}"
