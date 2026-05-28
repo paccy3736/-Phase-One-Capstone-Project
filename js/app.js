@@ -61,12 +61,13 @@ function createBookCard(book) {
       <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">${book.title}</h3>
       <p class="text-gray-500 text-xs mb-3">${book.author}</p>
       <button
-        class="fav-btn mt-auto w-full text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200 ${favorited ? 'bg-red-500 hover:bg-red-600' : 'bg-navy hover:bg-gold'}"
+        class="fav-btn mt-auto w-full text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200 ${favorited ? 'bg-green-500 cursor-default' : 'bg-navy hover:bg-gold'}"
         data-id="${book.id}"
         data-title="${book.title}"
         data-author="${book.author}"
-        data-cover="${book.cover}">
-        ${favorited ? '♥ Remove Favorite' : '♡ Add to Favorites'}
+        data-cover="${book.cover}"
+        ${favorited ? 'disabled' : ''}>
+        ${favorited ? '✓ Added to Favorites!' : '♡ Add to Favorites'}
       </button>
     </div>
   `;
@@ -122,6 +123,29 @@ async function handleSearch(e) {
   }
 }
 
+// --- Toast notification ---
+
+function showToast(message, type = 'success') {
+  const toast   = document.getElementById('toast');
+  const toastMsg  = document.getElementById('toast-msg');
+  const toastIcon = document.getElementById('toast-icon');
+
+  toastMsg.textContent  = message;
+  toastIcon.textContent = type === 'success' ? '♥' : '♡';
+  toast.style.backgroundColor = type === 'success' ? '#06b6d4' : '#ef4444';
+
+  // Slide in
+  toast.classList.remove('translate-y-20', 'opacity-0');
+  toast.classList.add('translate-y-0', 'opacity-100');
+
+  // Slide out after 3s
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => {
+    toast.classList.add('translate-y-20', 'opacity-0');
+    toast.classList.remove('translate-y-0', 'opacity-100');
+  }, 3000);
+}
+
 // --- Favorites toggle ---
 
 function handleFavClick(e) {
@@ -136,13 +160,15 @@ function handleFavClick(e) {
   };
 
   if (isFavorite(book.id)) {
-    removeFavorite(book.id);
-    btn.textContent = '♡ Add to Favorites';
-    btn.className = 'fav-btn mt-auto w-full bg-navy text-white text-xs font-semibold py-2 rounded-md hover:bg-gold transition-colors duration-200';
+    // Already favorited — do nothing on homepage (remove is only on favorites page)
+    return;
   } else {
     addFavorite(book);
-    btn.textContent = '♥ Remove Favorite';
-    btn.className = 'fav-btn mt-auto w-full bg-red-500 text-white text-xs font-semibold py-2 rounded-md hover:bg-red-600 transition-colors duration-200';
+
+    // Show confirmation on the button itself
+    btn.textContent = '✓ Added to Favorites!';
+    btn.className = 'fav-btn mt-auto w-full bg-green-500 text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200 cursor-default';
+    btn.disabled = true;
   }
 }
 
