@@ -1,37 +1,27 @@
 // app.js — Lab 3 (Exercises 3.2, 3.3, 3.4)
-// Populates homepage from Open Library API with search + loading states
 
-import { addFavorite, removeFavorite, isFavorite } from './favorites.js';
+import { addFavorite, isFavorite } from './favorites.js';
 import { fetchFeaturedBooks, searchBooks } from './fetchBooks.js';
-
-// DOM refs
-const grid        = document.getElementById('books-grid');
-const loading     = document.getElementById('loading');
-const noResults   = document.getElementById('no-results');
-const sectionTitle = document.getElementById('section-title');
-const resultCount  = document.getElementById('result-count');
-const searchForm  = document.getElementById('search-form');
-const searchInput = document.getElementById('search-input');
 
 // --- UI helpers ---
 
-function showLoading() {
+function showLoading(grid, loading, noResults) {
   loading.classList.remove('hidden');
   grid.classList.add('hidden');
   noResults.classList.add('hidden');
 }
 
-function hideLoading() {
+function hideLoading(grid, loading) {
   loading.classList.add('hidden');
   grid.classList.remove('hidden');
 }
 
-function showNoResults() {
+function showNoResults(grid, noResults) {
   noResults.classList.remove('hidden');
   grid.classList.add('hidden');
 }
 
-function updateCount(count, query = '') {
+function updateCount(sectionTitle, resultCount, count, query = '') {
   if (query) {
     sectionTitle.textContent = `Results for "${query}"`;
     resultCount.textContent = `${count} book${count !== 1 ? 's' : ''} found`;
@@ -75,82 +65,16 @@ function createBookCard(book) {
   return card;
 }
 
-function renderBooks(books) {
+function renderBooks(grid, books) {
   grid.innerHTML = '';
   books.forEach(book => grid.appendChild(createBookCard(book)));
-}
-
-// --- API calls ---
-
-async function loadFeatured() {
-  showLoading();
-  try {
-    const books = await fetchFeaturedBooks(12);
-    hideLoading();
-    if (books.length === 0) {
-      showNoResults();
-    } else {
-      renderBooks(books);
-      updateCount(books.length);
-    }
-  } catch (err) {
-    hideLoading();
-    showNoResults();
-    console.error('Failed to load featured books:', err);
-  }
-}
-
-async function handleSearch(e) {
-  e.preventDefault();
-  const query = searchInput.value.trim();
-  if (!query) return;
-
-  showLoading();
-  try {
-    const books = await searchBooks(query, 12);
-    hideLoading();
-    if (books.length === 0) {
-      showNoResults();
-      updateCount(0, query);
-    } else {
-      renderBooks(books);
-      updateCount(books.length, query);
-    }
-  } catch (err) {
-    hideLoading();
-    showNoResults();
-    console.error('Search failed:', err);
-  }
-}
-
-// --- Toast notification ---
-
-function showToast(message, type = 'success') {
-  const toast   = document.getElementById('toast');
-  const toastMsg  = document.getElementById('toast-msg');
-  const toastIcon = document.getElementById('toast-icon');
-
-  toastMsg.textContent  = message;
-  toastIcon.textContent = type === 'success' ? '♥' : '♡';
-  toast.style.backgroundColor = type === 'success' ? '#06b6d4' : '#ef4444';
-
-  // Slide in
-  toast.classList.remove('translate-y-20', 'opacity-0');
-  toast.classList.add('translate-y-0', 'opacity-100');
-
-  // Slide out after 3s
-  clearTimeout(toast._timer);
-  toast._timer = setTimeout(() => {
-    toast.classList.add('translate-y-20', 'opacity-0');
-    toast.classList.remove('translate-y-0', 'opacity-100');
-  }, 3000);
 }
 
 // --- Favorites toggle ---
 
 function handleFavClick(e) {
   const btn = e.target.closest('.fav-btn');
-  if (!btn) return;
+  if (!btn || btn.disabled) return;
 
   const book = {
     id:     btn.dataset.id,
@@ -159,17 +83,12 @@ function handleFavClick(e) {
     cover:  btn.dataset.cover,
   };
 
-  if (isFavorite(book.id)) {
-    // Already favorited — do nothing on homepage (remove is only on favorites page)
-    return;
-  } else {
-    addFavorite(book);
+  if (isFavorite(book.id)) return;
 
-    // Show confirmation on the button itself
-    btn.textContent = '✓ Added to Favorites!';
-    btn.className = 'fav-btn mt-auto w-full bg-green-500 text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200 cursor-default';
-    btn.disabled = true;
-  }
+  addFavorite(book);
+  btn.textContent = '✓ Added to Favorites!';
+  btn.className = 'fav-btn mt-auto w-full bg-green-500 text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200 cursor-default';
+  btn.disabled = true;
 }
 
 // --- Mobile menu ---
@@ -183,8 +102,52 @@ function initMobileMenu() {
 // --- Init ---
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadFeatured();
-  grid?.addEventListener('click', handleFavClick);
-  searchForm?.addEventListener('submit', handleSearch);
+  const grid         = document.getElementById('books-grid');
+  const loading      = document.getElementById('loading');
+  const noResults    = document.getElementById('no-results');
+  const sectionTitle = document.getElementById('section-title');
+  const resultCount  = document.getElementById('result-count');
+  const searchForm   = document.getElementById('search-form');
+  const searchInput  = document.getElementById('search-input');
+
+  if (!grid) return; // not on homepage
+
+  // Load featured books on page load
+  (async () => {
+    showLoading(grid, loading, noResults);
+    try {
+      const books = await fetchFeaturedBooks(12);
+      hideLoading(grid, loading);
+      books.length === 0
+        ? showNoResults(grid, noResults)
+        : (renderBooks(grid, books), updateCount(sectionTitle, resultCount, books.length));
+    } catch (err) {
+      hideLoading(grid, loading);
+      showNoResults(grid, noResults);
+      console.error('Failed to load featured books:', err);
+    }
+  })();
+
+  // Search
+  searchForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const query = searchInput.value.trim();
+    if (!query) return;
+
+    showLoading(grid, loading, noResults);
+    try {
+      const books = await searchBooks(query, 12);
+      hideLoading(grid, loading);
+      books.length === 0
+        ? (showNoResults(grid, noResults), updateCount(sectionTitle, resultCount, 0, query))
+        : (renderBooks(grid, books), updateCount(sectionTitle, resultCount, books.length, query));
+    } catch (err) {
+      hideLoading(grid, loading);
+      showNoResults(grid, noResults);
+      console.error('Search failed:', err);
+    }
+  });
+
+  grid.addEventListener('click', handleFavClick);
   initMobileMenu();
 });
