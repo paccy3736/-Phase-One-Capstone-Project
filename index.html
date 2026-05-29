@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="description" content="Book Explorer — Search, discover and save your favourite books powered by Open Library API." />
   <title>Book Explorer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -25,7 +26,6 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     html, body { max-width: 100%; overflow-x: hidden; }
-    .book-card:hover .book-overlay { opacity: 1; }
     .accent-text   { color: #06b6d4 !important; }
     .accent-bg     { background-color: #06b6d4 !important; }
     .accent-bg:hover { background-color: #0891b2 !important; }
@@ -42,25 +42,18 @@
     </a>
     <ul class="hidden md:flex items-center gap-8 text-white text-sm font-medium">
       <li>
-        <a href="index.html" class="pb-1 border-b-2 border-white hover:accent-text accent-border transition-colors duration-200">
-          Home
-        </a>
+        <a href="index.html" class="pb-1 border-b-2 border-white accent-border transition-colors duration-200">Home</a>
       </li>
       <li>
-        <a href="favorites.html" class="pb-1 border-b-2 border-transparent hover:text-gold hover:border-gold transition-colors duration-200">
-          Favorites
-        </a>
+        <a href="favorites.html" class="pb-1 border-b-2 border-transparent hover:text-gold transition-colors duration-200">Favorites</a>
       </li>
       <li>
-        <a href="about.html" class="pb-1 border-b-2 border-transparent hover:text-gold hover:border-gold transition-colors duration-200">
-          About
-        </a>
+        <a href="about.html" class="pb-1 border-b-2 border-transparent hover:text-gold transition-colors duration-200">About</a>
       </li>
     </ul>
     <button id="menu-btn" class="md:hidden text-white focus:outline-none" aria-label="Toggle menu">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     </button>
   </nav>
@@ -114,7 +107,7 @@
       <p class="text-gray-400 text-sm mt-1">Try searching for a different title.</p>
     </div>
 
-    <div id="books-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div id="books-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       <!-- Cards rendered dynamically by app.js -->
     </div>
   </main>
@@ -127,113 +120,7 @@
   </footer>
 
   <div id="toast"
-       class="fixed bottom-6 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl text-white text-sm font-medium
-              translate-y-20 opacity-0 transition-all duration-300 pointer-events-none max-w-xs"
-       role="status" aria-live="polite">
-    <span id="toast-icon" class="text-lg"></span>
-    <span id="toast-msg"></span>
-  </div>
-
-  <script type="module" src="js/app.js"></script>
-
-</body>
-</html>
-
-  <!-- NAVBAR -->
-  <nav class="bg-navy px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-lg">
-    <a href="index.html" class="accent-text font-serif text-2xl font-bold tracking-wide">
-      Book Explorer
-    </a>
-    <ul class="hidden md:flex items-center gap-8 text-white text-sm font-medium">
-      <li>
-        <a href="index.html" class="pb-1 border-b-2 border-white hover:accent-text accent-border transition-colors duration-200">
-          Home
-        </a>
-      </li>
-      <li>
-        <a href="favorites.html" class="pb-1 border-b-2 border-transparent hover:text-gold hover:border-gold transition-colors duration-200">
-          Favorites
-        </a>
-      </li>
-      <li>
-        <a href="about.html" class="pb-1 border-b-2 border-transparent hover:text-gold hover:border-gold transition-colors duration-200">
-          About
-        </a>
-      </li>
-    </ul>
-    <button id="menu-btn" class="md:hidden text-white focus:outline-none" aria-label="Toggle menu">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
-  </nav>
-
-  <div id="mobile-menu" class="hidden bg-navy-light md:hidden px-6 py-4 flex flex-col gap-4">
-    <a href="index.html" class="text-white hover:accent-text transition-colors">Home</a>
-    <a href="favorites.html" class="text-white hover:accent-text transition-colors">Favorites</a>
-    <a href="about.html" class="text-white hover:accent-text transition-colors">About</a>
-  </div>
-
-  <!-- HERO -->
-  <section class="text-white py-24 px-6 text-center" style="background: linear-gradient(135deg, #1e1245 0%, #2d1b69 40%, #4a2080 70%, #1a1f2e 100%);">
-    <h1 class="font-serif text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4">
-      Your Next Great Read <span class="accent-text">Awaits You</span>
-    </h1>
-    <p class="text-purple-200 text-base md:text-lg max-w-lg mx-auto mb-10">
-      Explore thousands of books, save your favourites, and let every page take you somewhere new.
-    </p>
-    <form id="search-form" class="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-xl mx-auto w-full px-2">
-      <input
-        id="search-input"
-        type="text"
-        placeholder="Type a book title..."
-        class="w-full sm:flex-1 px-5 py-3 rounded-md text-gray-800 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 accent-ring text-sm"
-        aria-label="Search for a book"
-      />
-      <button type="submit" class="accent-bg text-white font-semibold px-7 py-3 rounded-md transition-colors duration-200 text-sm whitespace-nowrap">
-        Search
-      </button>
-    </form>
-  </section>
-
-  <!-- BOOKS GRID -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-12 w-full">
-    <div class="flex items-center justify-between mb-8">
-      <h2 class="text-2xl font-bold text-gray-800" id="section-title">Featured Books</h2>
-      <span id="result-count" class="text-sm text-gray-500 hidden"></span>
-    </div>
-
-    <div id="loading" class="flex flex-col items-center justify-center py-20 hidden">
-      <div class="w-12 h-12 border-4 accent-border border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p class="text-gray-500 text-sm">Loading books...</p>
-    </div>
-
-    <div id="no-results" class="hidden text-center py-20">
-      <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <p class="text-gray-500 text-lg font-medium">No results found</p>
-      <p class="text-gray-400 text-sm mt-1">Try searching for a different title.</p>
-    </div>
-
-    <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
-      <!-- Cards rendered dynamically by app.js -->
-    </div>
-  </main>
-
-  <footer class="bg-navy text-gray-400 text-center py-6 mt-8">
-    <p class="text-sm">
-      &copy; 2026 <span class="accent-text font-medium">Book Explorer</span>.
-      Built by <span class="text-white font-medium">Pascaline</span>
-    </p>
-  </footer>
-
-  <!-- Toast notification -->
-  <div id="toast"
-       class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl text-white text-sm font-medium
-              translate-y-20 opacity-0 transition-all duration-300 pointer-events-none"
+       class="fixed bottom-6 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl text-white text-sm font-medium translate-y-20 opacity-0 transition-all duration-300 pointer-events-none max-w-xs"
        role="status" aria-live="polite">
     <span id="toast-icon" class="text-lg"></span>
     <span id="toast-msg"></span>
