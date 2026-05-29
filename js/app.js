@@ -3,6 +3,34 @@
 import { addFavorite, isFavorite } from './favorites.js';
 import { fetchFeaturedBooks, searchBooks } from './fetchBooks.js';
 
+// --- Toast ---
+
+function showToast(message, icon = '✓', bgColor = 'bg-green-500') {
+  const toast = document.getElementById('toast');
+  const msg   = document.getElementById('toast-msg');
+  const ico   = document.getElementById('toast-icon');
+
+  if (!toast || !msg || !ico) return;
+
+  msg.textContent = message;
+  ico.textContent = icon;
+
+  // Reset color classes then apply new one
+  toast.className = toast.className.replace(/bg-\S+/g, '').trim();
+  toast.classList.add(bgColor);
+
+  // Slide in
+  toast.classList.remove('translate-y-20', 'opacity-0');
+  toast.classList.add('translate-y-0', 'opacity-100');
+
+  // Slide out after 3s
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => {
+    toast.classList.add('translate-y-20', 'opacity-0');
+    toast.classList.remove('translate-y-0', 'opacity-100');
+  }, 3000);
+}
+
 // --- UI helpers ---
 
 function showLoading(grid, loading, noResults) {
@@ -89,6 +117,8 @@ function handleFavClick(e) {
   btn.textContent = '✓ Added to Favorites!';
   btn.className = 'fav-btn mt-auto w-full bg-green-500 text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200 cursor-default';
   btn.disabled = true;
+
+  showToast(`"${book.title}" added to favorites!`, '✓', 'bg-green-500');
 }
 
 // --- Mobile menu ---
