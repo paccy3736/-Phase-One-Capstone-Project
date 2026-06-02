@@ -79,7 +79,7 @@ function createBookCard(book) {
       <h3 class="font-bold text-gray-800 text-xs sm:text-sm mb-1 line-clamp-2">${book.title}</h3>
       <p class="text-gray-500 text-xs mb-3">${book.author}</p>
       <button
-        class="fav-btn mt-auto w-full text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200 ${favorited ? 'bg-green-500 cursor-default' : 'bg-navy hover:bg-gold'}"
+        class="fav-btn mt-auto w-full text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200 ${favorited ? 'bg-green-500 cursor-default' : 'bg-gray-900 hover:bg-cyan-500'}"
         data-id="${book.id}"
         data-title="${book.title}"
         data-author="${book.author}"
