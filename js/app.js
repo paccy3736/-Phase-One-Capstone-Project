@@ -3,35 +3,7 @@
 import { addFavorite, isFavorite } from './favorites.js';
 import { fetchFeaturedBooks, searchBooks } from './fetchBooks.js';
 
-// --- Toast ---
-
-function showToast(message, icon = '✓', bgColor = 'bg-green-500') {
-  const toast = document.getElementById('toast');
-  const msg   = document.getElementById('toast-msg');
-  const ico   = document.getElementById('toast-icon');
-
-  if (!toast || !msg || !ico) return;
-
-  msg.textContent = message;
-  ico.textContent = icon;
-
-  // Reset color classes then apply new one
-  toast.className = toast.className.replace(/bg-\S+/g, '').trim();
-  toast.classList.add(bgColor);
-
-  // Slide in
-  toast.classList.remove('translate-y-20', 'opacity-0');
-  toast.classList.add('translate-y-0', 'opacity-100');
-
-  // Slide out after 3s
-  clearTimeout(toast._hideTimer);
-  toast._hideTimer = setTimeout(() => {
-    toast.classList.add('translate-y-20', 'opacity-0');
-    toast.classList.remove('translate-y-0', 'opacity-100');
-  }, 3000);
-}
-
-// --- UI helpers ---
+// ─── UI Helpers ──────────────────────────────────────────────────────────────
 
 function showLoading(grid, loading, noResults) {
   loading.classList.remove('hidden');
@@ -60,11 +32,37 @@ function updateCount(sectionTitle, resultCount, count, query = '') {
   }
 }
 
-// --- Card builder ---
+function showToast(message, icon = '✓', bgColor = 'bg-green-500') {
+  const toast = document.getElementById('toast');
+  const msg   = document.getElementById('toast-msg');
+  const ico   = document.getElementById('toast-icon');
+
+  if (!toast || !msg || !ico) return;
+
+  msg.textContent = message;
+  ico.textContent = icon;
+
+  // Reset color classes then apply new one
+  toast.className = toast.className.replace(/bg-\S+/g, '').trim();
+  toast.classList.add(bgColor);
+
+  // Slide in
+  toast.classList.remove('translate-y-20', 'opacity-0');
+  toast.classList.add('translate-y-0', 'opacity-100');
+
+  // Slide out after 3s
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => {
+    toast.classList.add('translate-y-20', 'opacity-0');
+    toast.classList.remove('translate-y-0', 'opacity-100');
+  }, 3000);
+}
+
+// ─── Card Builder ─────────────────────────────────────────────────────────────
 
 function createBookCard(book) {
   const card = document.createElement('div');
-  card.className = 'book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col w-full';
+  card.className = 'bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col w-full';
   card.dataset.id = book.id;
 
   const favorited = isFavorite(book.id);
@@ -98,7 +96,7 @@ function renderBooks(grid, books) {
   books.forEach(book => grid.appendChild(createBookCard(book)));
 }
 
-// --- Favorites toggle ---
+// ─── Event Handlers ───────────────────────────────────────────────────────────
 
 function handleFavClick(e) {
   const btn = e.target.closest('.fav-btn');
@@ -121,15 +119,13 @@ function handleFavClick(e) {
   showToast(`"${book.title}" added to favorites!`, '✓', 'bg-green-500');
 }
 
-// --- Mobile menu ---
-
 function initMobileMenu() {
   const btn  = document.getElementById('menu-btn');
   const menu = document.getElementById('mobile-menu');
   if (btn && menu) btn.addEventListener('click', () => menu.classList.toggle('hidden'));
 }
 
-// --- Init ---
+// ─── Init ─────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
   const grid         = document.getElementById('books-grid');
