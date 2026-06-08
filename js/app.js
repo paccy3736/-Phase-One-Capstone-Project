@@ -32,7 +32,7 @@ function updateCount(sectionTitle, resultCount, count, query = '') {
   }
 }
 
-function showToast(message, icon = '✓', bgColor = 'bg-green-500') {
+function showToast(message, icon = '✓') {
   const toast = document.getElementById('toast');
   const msg   = document.getElementById('toast-msg');
   const ico   = document.getElementById('toast-icon');
@@ -41,10 +41,6 @@ function showToast(message, icon = '✓', bgColor = 'bg-green-500') {
 
   msg.textContent = message;
   ico.textContent = icon;
-
-  // Reset color classes then apply new one
-  toast.className = toast.className.replace(/bg-\S+/g, '').trim();
-  toast.classList.add(bgColor);
 
   // Slide in
   toast.classList.remove('translate-y-20', 'opacity-0');
@@ -61,32 +57,60 @@ function showToast(message, icon = '✓', bgColor = 'bg-green-500') {
 // ─── Card Builder ─────────────────────────────────────────────────────────────
 
 function createBookCard(book) {
+  const favorited = isFavorite(book.id);
+
+  // Card container
   const card = document.createElement('div');
   card.className = 'bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col w-full';
   card.dataset.id = book.id;
 
-  const favorited = isFavorite(book.id);
+  // Cover image
+  const imgWrapper = document.createElement('div');
+  imgWrapper.className = 'relative overflow-hidden bg-gray-200 h-48 sm:h-64';
 
-  card.innerHTML = `
-    <div class="relative overflow-hidden bg-gray-200 h-48 sm:h-64">
-      <img src="${book.cover}" alt="${book.title}"
-           class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-           onerror="this.src='https://via.placeholder.com/300x400?text=No+Cover'" />
-    </div>
-    <div class="p-3 sm:p-4 flex flex-col flex-1">
-      <h3 class="font-bold text-gray-800 text-xs sm:text-sm mb-1 line-clamp-2">${book.title}</h3>
-      <p class="text-gray-500 text-xs mb-3">${book.author}</p>
-      <button
-        class="fav-btn mt-auto w-full text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200 ${favorited ? 'bg-green-500 cursor-default' : 'bg-gray-900 hover:bg-cyan-500'}"
-        data-id="${book.id}"
-        data-title="${book.title}"
-        data-author="${book.author}"
-        data-cover="${book.cover}"
-        ${favorited ? 'disabled' : ''}>
-        ${favorited ? '✓ Added to Favorites!' : '♡ Add to Favorites'}
-      </button>
-    </div>
-  `;
+  const img = document.createElement('img');
+  img.src = book.cover;
+  img.alt = book.title;
+  img.className = 'w-full h-full object-cover hover:scale-105 transition-transform duration-300';
+  img.onerror = () => { img.src = 'https://via.placeholder.com/300x400?text=No+Cover'; };
+
+  imgWrapper.appendChild(img);
+
+  // Text content
+  const body = document.createElement('div');
+  body.className = 'p-3 sm:p-4 flex flex-col flex-1';
+
+  const title = document.createElement('h3');
+  title.className = 'font-bold text-gray-800 text-xs sm:text-sm mb-1 line-clamp-2';
+  title.textContent = book.title;
+
+  const author = document.createElement('p');
+  author.className = 'text-gray-500 text-xs mb-3';
+  author.textContent = book.author;
+
+  // Favorites button
+  const btn = document.createElement('button');
+  btn.className = 'fav-btn mt-auto w-full text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200';
+  btn.dataset.id     = book.id;
+  btn.dataset.title  = book.title;
+  btn.dataset.author = book.author;
+  btn.dataset.cover  = book.cover;
+
+  if (favorited) {
+    btn.textContent = '✓ Added to Favorites!';
+    btn.classList.add('bg-green-500', 'cursor-default');
+    btn.disabled = true;
+  } else {
+    btn.textContent = '♡ Add to Favorites';
+    btn.classList.add('bg-gray-900', 'hover:bg-cyan-500');
+  }
+
+  // Assemble the card
+  body.appendChild(title);
+  body.appendChild(author);
+  body.appendChild(btn);
+  card.appendChild(imgWrapper);
+  card.appendChild(body);
 
   return card;
 }
@@ -116,7 +140,7 @@ function handleFavClick(e) {
   btn.className = 'fav-btn mt-auto w-full bg-green-500 text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200 cursor-default';
   btn.disabled = true;
 
-  showToast(`"${book.title}" added to favorites!`, '✓', 'bg-green-500');
+  showToast(`"${book.title}" added to favorites!`);
 }
 
 function initMobileMenu() {
@@ -125,7 +149,6 @@ function initMobileMenu() {
   if (btn && menu) btn.addEventListener('click', () => menu.classList.toggle('hidden'));
 }
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
   const grid         = document.getElementById('books-grid');
@@ -136,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchForm   = document.getElementById('search-form');
   const searchInput  = document.getElementById('search-input');
 
-  if (!grid) return; // not on homepage
+  if (!grid) return; 
 
   // Load featured books on page load
   (async () => {
@@ -155,18 +178,28 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   // Search
-  searchForm?.addEventListener('submit', async (e) => {
+  searchForm.addEventListener('submit', async function(e) {
     e.preventDefault();
+
     const query = searchInput.value.trim();
+
     if (!query) return;
 
     showLoading(grid, loading, noResults);
+
     try {
       const books = await searchBooks(query, 12);
+
       hideLoading(grid, loading);
-      books.length === 0
-        ? (showNoResults(grid, noResults), updateCount(sectionTitle, resultCount, 0, query))
-        : (renderBooks(grid, books), updateCount(sectionTitle, resultCount, books.length, query));
+
+      if (books.length === 0) {
+        showNoResults(grid, noResults);
+        updateCount(sectionTitle, resultCount, 0, query);
+      } else {
+        renderBooks(grid, books);
+        updateCount(sectionTitle, resultCount, books.length, query);
+      }
+
     } catch (err) {
       hideLoading(grid, loading);
       showNoResults(grid, noResults);
