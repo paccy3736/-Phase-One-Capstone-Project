@@ -33,7 +33,7 @@ function createFavCard(book) {
   const btn = document.createElement('button');
   btn.className = 'remove-btn mt-auto w-full bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-2 rounded-md transition-colors duration-200';
   btn.dataset.id = book.id;
-  btn.textContent = '♥ Remove Favorite';
+  btn.textContent = '♡ Remove Favorite';
 
   body.appendChild(title);
   body.appendChild(author);
