@@ -6,7 +6,7 @@ Built as a Phase One Capstone Project.
 
 ---
 
-## 🚀 Features
+1.Features
 
 - **Search Books** — Search by title across millions of books from the Open Library database
 - **Featured Books** — Homepage displays top-rated fiction books on load
@@ -20,7 +20,7 @@ Built as a Phase One Capstone Project.
 
 ---
 
-## 🛠️ Tech Stack
+2.Tech Stack
 
 | Technology | Purpose |
 |---|---|
@@ -32,7 +32,7 @@ Built as a Phase One Capstone Project.
 
 ---
 
-## 📁 Project Structure
+ 3.Project Structure
 
 ```
 ├── index.html          # Homepage — search and featured books
@@ -47,7 +47,7 @@ Built as a Phase One Capstone Project.
 
 ---
 
-## 🌐 API Used
+ 4.API Used
 
 **Open Library API** — [https://openlibrary.org](https://openlibrary.org)
 
@@ -57,7 +57,7 @@ Built as a Phase One Capstone Project.
 
 ---
 
-## ▶️ How to Run
+ 5.How to Run
 
 1. Clone the repository:
    ```bash
@@ -70,6 +70,6 @@ No installation or build step required — the project runs directly in the brow
 
 ---
 
-## 👩‍💻 Developer
+ 6.Developer
 
 Built by **Pascaline** — Phase One Capstone Project
